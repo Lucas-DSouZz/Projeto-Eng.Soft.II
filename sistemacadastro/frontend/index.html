@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Cadastro - Dashboard Administrativo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --surface-color: rgba(30, 41, 59, 0.7);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
+            --warning: #f59e0b;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
+                              radial-gradient(at 50% 0%, hsla(225,39%,30%,0.2) 0, transparent 50%), 
+                              radial-gradient(at 100% 0%, hsla(339,49%,30%,0.2) 0, transparent 50%);
+            background-attachment: fixed;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            padding: 2rem;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title {
+            flex-grow: 1;
+        }
+
+        h1 {
+            font-weight: 700;
+            font-size: 2.2rem;
+            background: linear-gradient(to right, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; flex-grow: 1; width: 100%; }
+
+        .tabs { display: flex; gap: 1rem; margin-bottom: 2rem; justify-content: center; }
+
+        .tab-btn {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn:hover { background: rgba(255, 255, 255, 0.1); transform: translateY(-2px); }
+        .tab-btn.active { background: var(--primary); border-color: var(--primary); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
+
+        .content-section { display: none; animation: fadeIn 0.5s ease; }
+        .content-section.active { display: block; }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; }
+
+        .card {
+            background: var(--surface-color); border: 1px solid var(--border-color);
+            border-radius: 12px; padding: 1.5rem; backdrop-filter: blur(10px);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex; flex-direction: column;
+        }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3); border-color: rgba(255, 255, 255, 0.2); }
+
+        .card h3 { font-size: 1.25rem; margin-bottom: 1rem; color: #fff; display: flex; align-items: center; gap: 0.5rem; }
+
+        .badge { padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
+        .badge-fisica { background: rgba(59, 130, 246, 0.2); color: #93c5fd; }
+        .badge-juridica { background: rgba(139, 92, 246, 0.2); color: #d8b4fe; }
+        .badge-produto { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; }
+
+        .info-row { display: flex; justify-content: space-between; margin-bottom: 0.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .info-label { color: var(--text-muted); font-size: 0.9rem; }
+        .info-value { font-weight: 500; font-size: 0.95rem; text-align: right; }
+        
+        .card-actions {
+            margin-top: auto;
+            padding-top: 1rem;
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.9rem;
+            cursor: pointer; border: none; color: white; transition: all 0.3s;
+            font-weight: 500;
+        }
+        .btn-primary { background: var(--primary); }
+        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-danger { background: var(--danger); }
+        .btn-danger:hover { background: var(--danger-hover); }
+        .btn-outline { background: transparent; border: 1px solid var(--border-color); }
+        .btn-outline:hover { background: rgba(255,255,255,0.1); }
+
+        .empty-state { text-align: center; padding: 4rem 2rem; background: var(--surface-color); border-radius: 12px; border: 1px dashed var(--border-color); color: var(--text-muted); grid-column: 1 / -1; }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px);
+            display: none; align-items: center; justify-content: center; z-index: 100;
+            opacity: 0; transition: opacity 0.3s ease;
+        }
+        .modal-overlay.active { display: flex; opacity: 1; }
+        
+        .modal {
+            background: #1e293b; border: 1px solid var(--border-color);
+            border-radius: 12px; padding: 2rem; width: 100%; max-width: 500px;
+            transform: translateY(20px); transition: transform 0.3s ease;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            max-height: 90vh; overflow-y: auto;
+        }
+        .modal-overlay.active .modal { transform: translateY(0); }
+
+        .modal-header { display: flex; justify-content: space-between; margin-bottom: 1.5rem; }
+        .modal-header h2 { font-size: 1.5rem; color: white; }
+        .close-btn { background: none; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; }
+        .close-btn:hover { color: white; }
+
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--text-muted); }
+        .form-control {
+            width: 100%; padding: 0.75rem; border-radius: 6px;
+            background: rgba(15, 23, 42, 0.5); border: 1px solid var(--border-color);
+            color: white; font-size: 1rem; outline: none; transition: border-color 0.3s;
+        }
+        .form-control:focus { border-color: var(--primary); }
+        
+        .toast {
+            position: fixed; bottom: 20px; right: 20px;
+            background: var(--accent-green); color: white;
+            padding: 1rem 1.5rem; border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3);
+            transform: translateY(100px); opacity: 0; transition: all 0.3s; z-index: 1000;
+        }
+        .toast.show { transform: translateY(0); opacity: 1; }
+        .toast.error { background: var(--danger); }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div style="width: 100px;"></div>
+        <div class="header-title">
+            <h1>Sistema de Cadastro</h1>
+            <p>Dashboard Administrativo Interativo</p>
+        </div>
+        <div style="width: 100px;"></div>
+    </header>
+
+    <div class="container">
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('fisicas')">Clientes (Física)</button>
+            <button class="tab-btn" onclick="switchTab('juridicas')">Fornecedores (Jurídica)</button>
+            <button class="tab-btn" onclick="switchTab('produtos')">Produtos</button>
+        </div>
+
+        <div id="fisicas" class="content-section active">
+            <div class="section-header">
+                <h2>Gerenciar Clientes</h2>
+                <button class="btn btn-primary" onclick="openModal('fisica')">+ Novo Cliente</button>
+            </div>
+            <div id="fisicas-content" class="card-grid"></div>
+        </div>
+
+        <div id="juridicas" class="content-section">
+            <div class="section-header">
+                <h2>Gerenciar Fornecedores</h2>
+                <button class="btn btn-primary" onclick="openModal('juridica')">+ Novo Fornecedor</button>
+            </div>
+            <div id="juridicas-content" class="card-grid"></div>
+        </div>
+
+        <div id="produtos" class="content-section">
+            <div class="section-header">
+                <h2>Gerenciar Produtos</h2>
+                <button class="btn btn-primary" onclick="openModal('produto')">+ Novo Produto</button>
+            </div>
+            <div id="produtos-content" class="card-grid"></div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="modal-overlay" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modal-title">Cadastrar</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <form id="data-form" onsubmit="submitForm(event)">
+                <input type="hidden" id="entity-id">
+                <input type="hidden" id="entity-type">
+                
+                <div id="dynamic-fields"></div>
+                
+                <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                    <button type="button" class="btn btn-outline" style="flex: 1;" onclick="closeModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="toast" class="toast">Ação realizada com sucesso!</div>
+
+    <script>
+        const API_BASE = 'http://localhost:8085';
+        let currentData = { fisicas: [], juridicas: [], produtos: [] };
+
+        // Fields config for forms
+        const formConfig = {
+            fisica: [
+                { id: 'nome', label: 'Nome Completo', type: 'text', required: true },
+                { id: 'cpf', label: 'CPF (somente números, 11 dígitos)', type: 'text', required: true, minlength: 11, maxlength: 14 },
+                { id: 'dataNascimento', label: 'Data de Nascimento', type: 'date', required: true },
+                { id: 'usuario', label: 'Nome de Usuário', type: 'text', required: true },
+                { id: 'senha', label: 'Senha', type: 'password', required: true }
+            ],
+            juridica: [
+                { id: 'nome', label: 'Razão Social / Nome Fantasia', type: 'text', required: true },
+                { id: 'cnpj', label: 'CNPJ (somente números, 14 dígitos)', type: 'text', required: true, minlength: 14, maxlength: 18 },
+                { id: 'usuario', label: 'Nome de Usuário', type: 'text', required: true },
+                { id: 'senha', label: 'Senha', type: 'password', required: true }
+            ],
+            produto: [
+                { id: 'nome', label: 'Nome do Produto', type: 'text', required: true },
+                { id: 'descricao', label: 'Descrição', type: 'text', required: false },
+                { id: 'preco', label: 'Preço (R$)', type: 'number', step: '0.01', required: true },
+                { id: 'quantidade', label: 'Quantidade', type: 'number', required: true },
+                { id: 'estoqueMinimo', label: 'Estoque Mínimo', type: 'number', required: true },
+                { id: 'fornecedorId', label: 'ID do Fornecedor (Opcional)', type: 'number', required: false }
+            ]
+        };
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            loadData(tabId);
+        }
+
+        async function loadData(type) {
+            const container = document.getElementById(`${type}-content`);
+            try {
+                const response = await fetch(`${API_BASE}/${type}`);
+                if (!response.ok) throw new Error('Falha ao carregar');
+                
+                const data = await response.json();
+                currentData[type] = data; // Cache data for editing
+                
+                if (data.length === 0) {
+                    container.innerHTML = `<div class="empty-state"><h3>Nenhum registro encontrado</h3><p>Clique no botão acima para adicionar.</p></div>`;
+                    return;
+                }
+                container.innerHTML = data.map(item => renderCard(type, item)).join('');
+            } catch (error) {
+                container.innerHTML = `<div class="empty-state" style="color: #ef4444;"><h3>Erro de Conexão</h3><p>Verifique se o backend está rodando na porta 8085.</p></div>`;
+            }
+        }
+
+        function renderCard(type, item) {
+            let badge = '', infos = '';
+            let editId = item.id;
+
+            if (type === 'fisicas') {
+                editId = item.idPessoa;
+                badge = `<span class="badge badge-fisica">Cliente</span>`;
+                infos = `
+                    <div class="info-row"><span class="info-label">CPF</span> <span class="info-value">${item.cpf || ''}</span></div>
+                    <div class="info-row"><span class="info-label">Usuário</span> <span class="info-value">${(item.acesso && item.acesso.usuario) ? item.acesso.usuario : ''}</span></div>`;
+            } else if (type === 'juridicas') {
+                editId = item.idPessoa;
+                badge = `<span class="badge badge-juridica">Fornecedor</span>`;
+                infos = `
+                    <div class="info-row"><span class="info-label">CNPJ</span> <span class="info-value">${item.cnpj || ''}</span></div>
+                    <div class="info-row"><span class="info-label">Usuário</span> <span class="info-value">${(item.acesso && item.acesso.usuario) ? item.acesso.usuario : ''}</span></div>`;
+            } else if (type === 'produtos') {
+                editId = item.id;
+                const statusColor = item.status === 'ESTOQUE_BAIXO' ? '#ef4444' : '#10b981';
+                badge = `<span class="badge badge-produto">Produto</span>`;
+                infos = `
+                    <div class="info-row"><span class="info-label">Preço</span> <span class="info-value">R$ ${item.preco ? item.preco.toFixed(2) : '0.00'}</span></div>
+                    <div class="info-row"><span class="info-label">Estoque</span> <span class="info-value">${item.quantidade || 0} unid.</span></div>
+                    <div class="info-row"><span class="info-label">Status</span> <span class="info-value" style="color: ${statusColor}">${item.status || 'N/A'}</span></div>`;
+            }
+
+            return `
+                <div class="card">
+                    <h3>${badge} ${item.nome || 'Sem Nome'}</h3>
+                    <div class="info-row"><span class="info-label">ID</span> <span class="info-value">#${editId}</span></div>
+                    ${infos}
+                    <div class="card-actions">
+                        <button class="btn btn-outline" onclick="openModal('${type.slice(0, -1)}', ${editId})">Editar</button>
+                        <button class="btn btn-danger" onclick="deleteItem('${type}', ${editId})">Excluir</button>
+                    </div>
+                </div>`;
+        }
+
+        function openModal(type, id = null) {
+            const config = formConfig[type];
+            document.getElementById('entity-type').value = type;
+            document.getElementById('entity-id').value = id || '';
+            document.getElementById('modal-title').innerText = id ? `Editar ${type}` : `Novo ${type}`;
+
+            let item = null;
+            if (id) {
+                const list = currentData[type + 's'];
+                item = list.find(x => (x.idPessoa || x.id) == id);
+            }
+
+            const html = config.map(field => {
+                let val = '';
+                if (item) {
+                    if ((field.id === 'usuario' || field.id === 'senha') && item.acesso) {
+                        val = item.acesso[field.id];
+                    } else {
+                        val = item[field.id];
+                    }
+                }
+                if(field.type === 'date' && val) val = val.split('T')[0];
+                let inputHtml = `<input type="${field.type}" id="${field.id}" class="form-control" ${field.required ? 'required' : ''} ${field.step ? `step="${field.step}"` : ''} ${field.minlength ? `minlength="${field.minlength}"` : ''} ${field.maxlength ? `maxlength="${field.maxlength}"` : ''} value="${val || ''}">`;
+                
+                if (field.type === 'password') {
+                    inputHtml = `
+                    <div style="position: relative;">
+                        ${inputHtml}
+                        <button type="button" onclick="togglePassword('${field.id}')" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 1.2rem;">👁️</button>
+                    </div>`;
+                }
+
+                return `
+                <div class="form-group">
+                    <label>${field.label}</label>
+                    ${inputHtml}
+                </div>`;
+            }).join('');
+            
+            document.getElementById('dynamic-fields').innerHTML = html;
+            document.getElementById('modal-overlay').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modal-overlay').classList.remove('active');
+        }
+
+        async function submitForm(e) {
+            e.preventDefault();
+            const type = document.getElementById('entity-type').value;
+            const id = document.getElementById('entity-id').value;
+            const config = formConfig[type];
+            
+            let payload = {};
+            config.forEach(f => {
+                let val = document.getElementById(f.id).value;
+                if(f.type === 'number') val = Number(val);
+                if(f.type === 'date' && val) val = new Date(val).toISOString().replace('Z', '+0000'); 
+                payload[f.id] = val;
+            });
+
+            // Need to set empty arrays for addresses to avoid validation errors if required
+            if(type === 'fisica' || type === 'juridica') payload.endereco = [];
+
+            const method = id ? 'PUT' : 'POST';
+            const url = id ? `${API_BASE}/${type}s/${id}` : `${API_BASE}/${type}s`;
+
+            try {
+                const res = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                if (res.ok) {
+                    showToast('Salvo com sucesso!');
+                    closeModal();
+                    loadData(type + 's');
+                } else {
+                    showToast('Erro ao salvar os dados.', true);
+                }
+            } catch (err) {
+                showToast('Erro de conexão.', true);
+            }
+        }
+
+        async function deleteItem(type, id) {
+            if (!confirm('Tem certeza que deseja excluir este item?')) return;
+            try {
+                const res = await fetch(`${API_BASE}/${type}/${id}`, { method: 'DELETE' });
+                if (res.ok) {
+                    showToast('Item excluído com sucesso!');
+                    loadData(type);
+                } else {
+                    showToast('Erro ao excluir. O item não existe ou está sendo usado.', true);
+                }
+            } catch(e) {
+                showToast('Erro de conexão.', true);
+            }
+        }
+
+        function showToast(msg, isError = false) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.className = 'toast show ' + (isError ? 'error' : '');
+            setTimeout(() => toast.className = 'toast', 3000);
+        }
+
+        function togglePassword(id) {
+            const input = document.getElementById(id);
+            if (input.type === 'password') {
+                input.type = 'text';
+            } else {
+                input.type = 'password';
+            }
+        }
+
+        // Init
+        loadData('fisicas');
+    </script>
+</body>
+</html>
