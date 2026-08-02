@@ -429,6 +429,10 @@
                 if (res.ok) {
                     showToast('Item excluído com sucesso!');
                     loadData(type);
+                    
+                    if (document.getElementById('consultas') && document.getElementById('consultas').classList.contains('active')) {
+                        document.getElementById('consulta-result').innerHTML = '';
+                    }
                 } else {
                     showToast('Erro ao excluir. O item não existe ou está sendo usado.', true);
                 }
