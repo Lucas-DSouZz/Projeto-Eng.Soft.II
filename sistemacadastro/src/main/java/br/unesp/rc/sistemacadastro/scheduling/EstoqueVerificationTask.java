@@ -16,8 +16,8 @@ public class EstoqueVerificationTask {
     @Autowired
     private ProdutoService produtoService;
 
-    // Executa a cada 60.000 milissegundos (1 minuto)
-    @Scheduled(fixedRate = 60000)
+    // Executa a cada 15.000 milissegundos (15 segundos)
+    @Scheduled(fixedRate = 15000)
     public void verificarEstoque() {
         System.out.println("Iniciando verificação periódica de estoque dos produtos...");
         
