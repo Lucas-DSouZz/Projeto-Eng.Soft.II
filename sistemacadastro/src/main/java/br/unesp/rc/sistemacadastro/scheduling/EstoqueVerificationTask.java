@@ -24,11 +24,6 @@ public class EstoqueVerificationTask {
         List<Produto> produtos = produtoService.findAll();
         
         for (Produto produto : produtos) {
-            // A regra de atualizar status já está no ProdutoService (chamada entity.atualizarStatus()),
-            // mas findAll no ProdutoService também atualiza em memória. 
-            // Precisamos salvar no banco de dados se houve alteração.
-            
-            // O ProdutoService.update() atualiza o status baseado na quantidade e estoqueMinimo e salva no banco.
             produtoService.update(produto);
         }
         

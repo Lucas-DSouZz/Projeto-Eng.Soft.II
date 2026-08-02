@@ -53,7 +53,6 @@ public class FisicaResource {
             Long id = Long.parseLong(idOrCpf);
             fisica = fisicaService.findById(id);
         } catch (NumberFormatException e) {
-            // Not a Long, try by CPF
         }
 
         if (fisica == null) {
@@ -104,7 +103,6 @@ public class FisicaResource {
             Long id = Long.parseLong(idOrCpf);
             fisica = fisicaService.findById(id);
         } catch (NumberFormatException e) {
-            // Not a Long
         }
 
         if (fisica == null) {

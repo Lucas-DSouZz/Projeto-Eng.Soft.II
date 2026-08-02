@@ -1,8 +1,6 @@
 package br.unesp.rc.junit5tutorial;
 
 /**
- * Exemplo extraído do tutorial "Escrevendo Testes JUnit no NetBeans IDE"
- * URL: https://netbeans.apache.org//kb/docs/java/junit-intro_pt_BR.html
  * @author Prof. Frank J. Affonso
  */
 
